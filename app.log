@@ -1,0 +1,4 @@
+2025-09-25 12:58:26,322 ERROR: Error in index route: Could not build url for endpoint 'select_department'. Did you mean 'upload_dataset' instead? [in c:\Users\HarHar\Web-page_Enrollment-Forecasting\app4.py:457]
+2025-09-25 12:58:30,244 ERROR: Error in index route: Could not build url for endpoint 'select_department'. Did you mean 'upload_dataset' instead? [in c:\Users\HarHar\Web-page_Enrollment-Forecasting\app4.py:457]
+2025-09-25 13:06:38,343 INFO: Forecast request: course=BSBA-FINANCIAL_MANAGEMENT, year=2020-2021, semester=1 [in c:\Users\HarHar\Web-page_Enrollment-Forecasting\app4.py:486]
+2025-09-25 13:06:38,466 INFO: Prediction successful: 109 students using Statistical (Model Not Loaded) [in c:\Users\HarHar\Web-page_Enrollment-Forecasting\app4.py:583]
