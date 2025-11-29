@@ -1,0 +1,21 @@
+{
+  "input_shape": [
+    null,
+    4,
+    25
+  ],
+  "output_shape": [
+    null,
+    1
+  ],
+  "time_steps": 4,
+  "n_features": 25,
+  "training_samples": 176,
+  "test_samples": 44,
+  "performance": {
+    "mse": 0.28123062993231657,
+    "mae": 0.42667029495551395,
+    "r2": 0.19925867125154828,
+    "mape": 86.54350851879556
+  }
+}
