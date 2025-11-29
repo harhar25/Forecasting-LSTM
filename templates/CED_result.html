@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ course }} Historical Data - CED</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-color: #2a9d8f;
+      --secondary-color: #e9c46a;
+      --light-bg: #f8f9fc;
+      --dark-bg: #264653;
+      --border-radius: 8px;
+    }
+    
+    body {
+      background-color: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
+    
+    .dashboard-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      border-radius: var(--border-radius);
+      background: white;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 1.5rem;
+      transition: all 0.2s ease;
+      height: 100%;
+      padding: 1.5rem;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    
+    .card-title {
+      color: var(--primary-color);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--dark-bg);
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin-bottom: 2rem;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .chart-title {
+      color: var(--primary-color);
+      font-weight: 600;
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    
+    .btn-primary {
+      background: var(--primary-color);
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    
+    .btn-primary:hover {
+      background: #21867a;
+    }
+    
+    .download-btn {
+      background: transparent;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      padding: 0.4rem 1rem;
+      border-radius: var(--border-radius);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .download-btn:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+    
+    .year-level-card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid var(--primary-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .ced-badge {
+      background-color: var(--secondary-color);
+      color: var(--dark-bg);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    
+    .selected-data {
+      background-color: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-top: 4px solid var(--primary-color);
+    }
+    
+    .data-highlight {
+      background: var(--primary-color);
+      color: white;
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      margin: 1.5rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .table th {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+    }
+    
+    .table td {
+      border-color: #e9ecef;
+    }
+    
+    .alert-success {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .first-year-emphasis {
+      background: linear-gradient(135deg, #2a9d8f, #21867a);
+      color: white;
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h1 class="h3 mb-2">Historical FIRST-YEAR Enrollment Data <span class="ced-badge">CED</span></h1>
+          <p class="mb-1">{{ course }} • {{ year }} • {{ semester }} Semester</p>
+          <p class="mb-0 opacity-75">Computer Education Department - First-Year Historical Records</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <a href="{{ url_for('index') }}" class="btn btn-light">
+            <i class='bx bx-home'></i> Home
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-warning">
+          {% for msg in messages %}
+            <p class="mb-0">{{ msg }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Selected Data Focus -->
+    <div class="selected-data">
+      <h3 class="h5 mb-3"><i class='bx bx-target'></i> Selected Historical Data Parameters</h3>
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <div class="text-muted small">COURSE</div>
+          <div class="fw-bold">{{ course }}</div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="text-muted small">SCHOOL YEAR</div>
+          <div class="fw-bold">{{ year }}</div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="text-muted small">SEMESTER</div>
+          <div class="fw-bold">{{ semester }}</div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="text-muted small">FOCUS</div>
+          <div class="fw-bold text-success">First-Year Enrollment</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- First-Year Emphasis -->
+    <div class="first-year-emphasis">
+      <h3 class="h4 mb-2"><i class='bx bx-user-pin'></i> FIRST-YEAR ENROLLMENT FOCUS</h3>
+      <p class="mb-0">This analysis specifically highlights first-year student enrollment data for better admission planning</p>
+    </div>
+
+    <!-- Data Highlight -->
+    <div class="data-highlight">
+      <h2 class="h4 mb-2">First-Year Historical Enrollment: {{ first_year_enrollment }} students</h2>
+      <p class="mb-0 opacity-90">Based on actual first-year records from the uploaded dataset</p>
+    </div>
+
+    <!-- Year Level Breakdown -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3 class="chart-title"><i class='bx bx-bar-chart-alt'></i> Historical Enrollment by Year Level</h3>
+            <button class="download-btn" onclick="downloadChart('yearLevelChart', 'ced-year-levels-historical.png')">
+              <i class='bx bx-download'></i> Download
+            </button>
+          </div>
+          <canvas id="yearLevelChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Year Level Cards - Emphasizing First Year -->
+    <div class="row">
+      <div class="col-md-3">
+        <div class="year-level-card text-center" style="border-left: 4px solid #2a9d8f; background: #f0f9f8;">
+          <h5 class="h6 mb-3"><i class='bx bx-user-pin'></i> 1st Year</h5>
+          <div class="stat-number" style="color: #2a9d8f; font-size: 2rem;">{{ year_levels.first_year }}</div>
+          <small class="text-muted">First-Year Students</small>
+          <div class="mt-2">
+            <small class="text-success">
+              {% if total_enrollment > 0 %}
+                {{ ((year_levels.first_year / total_enrollment) * 100) | round(1) }}% of total
+              {% else %}
+                0% of total
+              {% endif %}
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="year-level-card text-center">
+          <h5 class="h6 mb-3"><i class='bx bx-user-plus'></i> 2nd Year</h5>
+          <div class="stat-number">{{ year_levels.second_year }}</div>
+          <small class="text-muted">Historical Students</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="year-level-card text-center">
+          <h5 class="h6 mb-3"><i class='bx bx-user-voice'></i> 3rd Year</h5>
+          <div class="stat-number">{{ year_levels.third_year }}</div>
+          <small class="text-muted">Historical Students</small>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="year-level-card text-center">
+          <h5 class="h6 mb-3"><i class='bx bx-user-check'></i> 4th Year</h5>
+          <div class="stat-number">{{ year_levels.fourth_year }}</div>
+          <small class="text-muted">Historical Students</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- First-Year Trend Chart -->
+    <div class="chart-container mt-4">
+      <div class="chart-header">
+        <h3 class="chart-title"><i class='bx bx-trending-up'></i> First-Year Enrollment Trend</h3>
+        <button class="download-btn" onclick="downloadChart('firstYearTrendChart', 'ced-first-year-trend.png')">
+          <i class='bx bx-download'></i> Download
+        </button>
+      </div>
+      <canvas id="firstYearTrendChart"></canvas>
+    </div>
+
+    <!-- Historical Trend -->
+    <div class="chart-container mt-4">
+      <div class="chart-header">
+        <h3 class="chart-title"><i class='bx bx-trending-up'></i> Year Level Enrollment Trends</h3>
+        <button class="download-btn" onclick="downloadChart('historicalChart', 'ced-historical-trend.png')">
+          <i class='bx bx-download'></i> Download
+        </button>
+      </div>
+      <canvas id="historicalChart"></canvas>
+    </div>
+
+    <!-- Pie Chart for Year Level Distribution -->
+    <div class="chart-container">
+      <div class="chart-header">
+        <h3 class="chart-title"><i class='bx bx-pie-chart-alt'></i> Year Level Distribution</h3>
+        <button class="download-btn" onclick="downloadChart('pieChart', 'ced-year-distribution.png')">
+          <i class='bx bx-download'></i> Download
+        </button>
+      </div>
+      <canvas id="pieChart"></canvas>
+    </div>
+
+    <!-- Data Summary Table -->
+    <div class="chart-container">
+      <div class="chart-header">
+        <h3 class="chart-title"><i class='bx bx-table'></i> Historical Data Summary</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Value</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Selected Course</strong></td>
+              <td>{{ course }}</td>
+              <td>Computer Education Department</td>
+            </tr>
+            <tr>
+              <td><strong>School Year</strong></td>
+              <td>{{ year }}</td>
+              <td>Academic year period</td>
+            </tr>
+            <tr>
+              <td><strong>Semester</strong></td>
+              <td>{{ semester }} Semester</td>
+              <td>Academic term</td>
+            </tr>
+            <tr style="background-color: #f0f9f8;">
+              <td><strong>First-Year Historical Enrollment</strong></td>
+              <td class="text-success"><strong>{{ first_year_enrollment }} students</strong></td>
+              <td><strong>Primary focus for admission planning</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Total Historical Enrollment</strong></td>
+              <td>{{ total_enrollment }} students</td>
+              <td>All year levels combined</td>
+            </tr>
+            <tr>
+              <td><strong>Year Level Distribution</strong></td>
+              <td>
+                1st: {{ year_levels.first_year }}, 
+                2nd: {{ year_levels.second_year }},<br>
+                3rd: {{ year_levels.third_year }}, 
+                4th: {{ year_levels.fourth_year }}
+              </td>
+              <td>Per year level breakdown</td>
+            </tr>
+            <tr>
+              <td><strong>Data Source</strong></td>
+              <td>Historical Dataset</td>
+              <td>Uploaded enrollment records</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="text-center mt-4 mb-5">
+      <a href="{{ url_for('ced_filter') }}" class="btn btn-primary me-2">
+        <i class='bx bx-filter-alt'></i> New Historical Analysis
+      </a>
+      <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+        <i class='bx bx-home'></i> Go to Home
+      </a>
+    </div>
+  </div>
+
+<script>
+// JSON data for the historical records
+const historicalData = {
+  course: "{{ course }}",
+  year: "{{ year }}",
+  semester: "{{ semester }}",
+  first_year_enrollment: {{ first_year_enrollment }},
+  total_enrollment: {{ total_enrollment }},
+  year_levels: {{ year_levels | tojson }},
+  historical_trend: {{ historical_trend | tojson }},
+  dataset_info: {{ dataset_info | tojson }}
+};
+
+console.log('Historical Data:', historicalData);
+
+// Year Level Chart
+new Chart(document.getElementById('yearLevelChart'), {
+  type: 'bar',
+  data: {
+    labels: ['1st Year', '2nd Year', '3rd Year', '4th Year'],
+    datasets: [{
+      label: 'Historical Enrollment by Year Level',
+      data: [
+        historicalData.year_levels.first_year,
+        historicalData.year_levels.second_year,
+        historicalData.year_levels.third_year,
+        historicalData.year_levels.fourth_year
+      ],
+      backgroundColor: [
+        '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51'
+      ],
+      borderColor: [
+        '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51'
+      ],
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Number of Students'
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Historical Enrollment Distribution by Year Level'
+      }
+    }
+  }
+});
+
+// First-Year Trend Chart
+new Chart(document.getElementById('firstYearTrendChart'), {
+  type: 'line',
+  data: {
+    labels: historicalData.historical_trend.labels,
+    datasets: [{
+      label: 'First-Year Enrollment Trend',
+      data: historicalData.historical_trend.first_year,
+      borderColor: '#2a9d8f',
+      backgroundColor: 'rgba(42, 157, 143, 0.1)',
+      fill: true,
+      tension: 0.4,
+      pointRadius: 5,
+      pointBackgroundColor: '#2a9d8f',
+      borderWidth: 3
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'First-Year Students'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Academic Period'
+        }
+      }
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'First-Year Enrollment Trend Over Time'
+      }
+    }
+  }
+});
+
+// Historical Trend Chart - Year Level Trends
+const historicalChart = new Chart(document.getElementById('historicalChart'), {
+    type: 'line',
+    data: {
+        labels: historicalData.historical_trend.labels,
+        datasets: [
+            {
+                label: '1st Year',
+                data: historicalData.historical_trend.first_year,
+                borderColor: '#2a9d8f',
+                backgroundColor: 'rgba(42, 157, 143, 0.1)',
+                fill: false,
+                tension: 0.4,
+                pointRadius: 4,
+                borderWidth: 3
+            },
+            {
+                label: '2nd Year',
+                data: historicalData.historical_trend.second_year,
+                borderColor: '#e9c46a',
+                backgroundColor: 'rgba(233, 196, 106, 0.1)',
+                fill: false,
+                tension: 0.4,
+                pointRadius: 4,
+                borderWidth: 2
+            },
+            {
+                label: '3rd Year',
+                data: historicalData.historical_trend.third_year,
+                borderColor: '#f4a261',
+                backgroundColor: 'rgba(244, 162, 97, 0.1)',
+                fill: false,
+                tension: 0.4,
+                pointRadius: 4,
+                borderWidth: 2
+            },
+            {
+                label: '4th Year',
+                data: historicalData.historical_trend.fourth_year,
+                borderColor: '#e76f51',
+                backgroundColor: 'rgba(231, 111, 81, 0.1)',
+                fill: false,
+                tension: 0.4,
+                pointRadius: 4,
+                borderWidth: 2
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Number of Students'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Academic Period'
+                }
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Year Level Enrollment Trends Over Time'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return `${context.dataset.label}: ${context.parsed.y} students`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Pie Chart for Year Level Distribution
+new Chart(document.getElementById('pieChart'), {
+  type: 'pie',
+  data: {
+    labels: ['1st Year', '2nd Year', '3rd Year', '4th Year'],
+    datasets: [{
+      data: [
+        historicalData.year_levels.first_year,
+        historicalData.year_levels.second_year,
+        historicalData.year_levels.third_year,
+        historicalData.year_levels.fourth_year
+      ],
+      backgroundColor: [
+        '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51'
+      ],
+      borderColor: [
+        '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51'
+      ],
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      },
+      title: {
+        display: true,
+        text: 'Year Level Distribution Percentage'
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = ((context.parsed / total) * 100).toFixed(1);
+            return `${context.label}: ${context.parsed} students (${percentage}%)`;
+          }
+        }
+      }
+    }
+  }
+});
+
+function downloadChart(canvasId, filename) {
+  const canvas = document.getElementById(canvasId);
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  // Show download notification
+  const notification = document.createElement('div');
+  notification.className = 'alert alert-success';
+  notification.innerHTML = '<i class="bx bx-check"></i> Chart downloaded successfully!';
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+</script>
+</body>
+</html>

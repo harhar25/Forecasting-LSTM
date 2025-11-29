@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ course }} - Data Visualization</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin-bottom: 2rem;
+    }
+    .back-btn {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary back-btn">
+      <i class='bx bx-arrow-back'></i> Back to Home
+    </a>
+
+    <h2>{{ course }} - Enrollment Data Visualization</h2>
+    
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5>Line Chart - Enrollment Trend</h5>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="lineChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5>Bar Chart - Enrollment by Period</h5>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5>Pie Chart - Enrollment Distribution</h5>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="pieChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5>Statistics</h5>
+          </div>
+          <div class="card-body">
+            <div id="statsContainer">
+              <p>Loading statistics...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Fetch data from backend
+    fetch('/get_visualization_data/{{ course }}')
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('statsContainer').innerHTML = 
+            '<div class="alert alert-danger">Error loading data: ' + data.error + '</div>';
+          return;
+        }
+
+        const labels = data.labels;
+        const actualData = data.actual_data;
+
+        // Calculate statistics
+        const validData = actualData.filter(val => val !== null && val !== undefined);
+        const average = validData.length ? (validData.reduce((a, b) => a + b, 0) / validData.length).toFixed(2) : 0;
+        const max = validData.length ? Math.max(...validData) : 0;
+        const min = validData.length ? Math.min(...validData) : 0;
+        const total = validData.reduce((a, b) => a + b, 0);
+
+        // Display statistics
+        document.getElementById('statsContainer').innerHTML = `
+          <p><strong>Total Enrollment:</strong> ${total}</p>
+          <p><strong>Average per Period:</strong> ${average}</p>
+          <p><strong>Maximum Enrollment:</strong> ${max}</p>
+          <p><strong>Minimum Enrollment:</strong> ${min}</p>
+          <p><strong>Number of Periods:</strong> ${validData.length}</p>
+        `;
+
+        // Create charts
+        createLineChart(labels, actualData);
+        createBarChart(labels, actualData);
+        createPieChart(labels, actualData);
+      })
+      .catch(error => {
+        document.getElementById('statsContainer').innerHTML = 
+          '<div class="alert alert-danger">Error loading data: ' + error.message + '</div>';
+      });
+
+    function createLineChart(labels, data) {
+      new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Enrollment',
+            data: data,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    function createBarChart(labels, data) {
+      new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Enrollment',
+            data: data,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    function createPieChart(labels, data) {
+      // For pie chart, we might want to group data if there are too many labels
+      new Chart(document.getElementById('pieChart'), {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: [
+              'rgb(255, 99, 132)',
+              'rgb(54, 162, 235)',
+              'rgb(255, 205, 86)',
+              'rgb(75, 192, 192)',
+              'rgb(153, 102, 255)',
+              'rgb(255, 159, 64)'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+  </script>
+</body>
+</html>

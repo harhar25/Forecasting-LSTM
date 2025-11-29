@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BED Enrollment Forecasting</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    :root {
+      --primary: #20c997;
+      --primary-dark: #198754;
+      --secondary: #4e73df;
+      --secondary-dark: #224abe;
+      --light-bg: #f8f9fc;
+      --dark-text: #2e3a59;
+      --mid-text: #5a5c69;
+      --light-text: #858796;
+      --card-shadow: 0 0.5rem 1.5rem rgba(58, 59, 69, 0.2);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+      min-height: 100vh;
+      padding: 2rem 0;
+      position: relative;
+      color: var(--mid-text);
+    }
+    
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 5% 10%, rgba(78, 115, 223, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 95% 10%, rgba(28, 200, 138, 0.05) 0%, transparent 20%);
+      z-index: -1;
+    }
+    
+    .page-header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .page-title {
+      color: var(--dark-text);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .page-title::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      border-radius: 2px;
+    }
+    
+    .page-subtitle {
+      color: var(--mid-text);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .dashboard-card {
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      background: white;
+      border: none;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .dashboard-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+    }
+    
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 1rem 3rem rgba(58, 59, 69, 0.25);
+    }
+    
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      padding: 1.5rem 1.5rem 0.5rem;
+    }
+    
+    .card-title {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 0;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .card-title i {
+      margin-right: 10px;
+      font-size: 1.6rem;
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+    
+    .filter-label {
+      font-weight: 600;
+      color: var(--mid-text);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    
+    .form-control, .form-select {
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d3e2;
+      transition: var(--transition);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
+      border: none;
+      border-radius: 10px;
+      padding: 0.875rem 1.5rem;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: 0 4px 15px rgba(78, 115, 223, 0.2);
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(to right, var(--primary-dark), #0f7350);
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(32, 201, 151, 0.3);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.25rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+    
+    .predict-btn {
+      background: linear-gradient(to right, var(--secondary), var(--secondary-dark));
+      color: white;
+      padding: 0.875rem 2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: var(--transition);
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(78, 115, 223, 0.2);
+    }
+    
+    .predict-btn:hover {
+      background: linear-gradient(to right, var(--secondary-dark), #1a3bb8);
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(78, 115, 223, 0.3);
+    }
+    
+    .btn-icon {
+      margin-left: 0.5rem;
+      transition: var(--transition);
+    }
+    
+    .predict-btn:hover .btn-icon {
+      transform: translateX(4px);
+    }
+    
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #d1d3e2, transparent);
+      margin: 2rem 0;
+      border: none;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .alert-success {
+      border-radius: 12px;
+      border-left: 5px solid var(--secondary);
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+      background: linear-gradient(to right, rgba(28, 200, 138, 0.05), rgba(28, 200, 138, 0.1));
+      border: none;
+    }
+    
+    .form-text {
+      color: var(--light-text);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateX(100px);
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .notification.success {
+      background: linear-gradient(to right, var(--secondary), var(--secondary-dark));
+    }
+    
+    .notification.error {
+      background: linear-gradient(to right, #e74a3b, #c0352d);
+    }
+    
+    .notification.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .result-card {
+      background: linear-gradient(to right, rgba(78, 115, 223, 0.03), rgba(28, 200, 138, 0.03));
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .result-title {
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .result-title i {
+      margin-right: 10px;
+      font-size: 1.5rem;
+    }
+    
+    .result-item {
+      display: flex;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .result-label {
+      font-weight: 600;
+      min-width: 160px;
+      color: var(--mid-text);
+    }
+    
+    .result-value {
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .confidence-interval {
+      background: rgba(28, 200, 138, 0.1);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+      display: inline-block;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .stat-box {
+      background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    }
+    
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0.5rem 0;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--mid-text);
+    }
+    
+    .dataset-status {
+      background: rgba(78, 115, 223, 0.05);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #4e73df;
+    }
+    
+    .dataset-status.no-dataset {
+      background: rgba(246, 194, 62, 0.05);
+      border-left: 4px solid #f6c23e;
+    }
+    
+    .dataset-status h5 {
+      color: #4e73df;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .dataset-status.no-dataset h5 {
+      color: #f6c23e;
+    }
+    
+    .dataset-status h5 i {
+      margin-right: 0.5rem;
+    }
+    
+    .dataset-info {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    
+    .dataset-info-item {
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .dataset-info-label {
+      font-size: 0.85rem;
+      color: var(--light-text);
+    }
+    
+    .dataset-info-value {
+      font-weight: 600;
+      color: #4e73df;
+    }
+    
+    .disabled-overlay {
+      position: relative;
+    }
+    
+    .disabled-overlay::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      z-index: 1;
+    }
+    
+    .disabled-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+      z-index: 2;
+      width: 80%;
+    }
+    
+    @media (max-width: 768px) {
+      .card-title {
+        font-size: 1.2rem;
+      }
+      
+      .result-item {
+        flex-direction: column;
+      }
+      
+      .result-label {
+        margin-bottom: 0.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <!-- Page Header -->
+    <div class="page-header mb-5">
+      <h1 class="page-title">BED Enrollment Forecasting System</h1>
+      <p class="page-subtitle">Predict student enrollment patterns using historical data and advanced forecasting algorithms</p>
+    </div>
+    
+    <!-- Dataset Status -->
+    <div id="datasetStatus" class="dataset-status no-dataset">
+      <h5><i class='bx bx-error-circle'></i> No Dataset Loaded</h5>
+      <p>Upload a dataset to enable historical forecasting functionality.</p>
+    </div>
+    
+    <div class="row">
+      <div class="col-12">
+        <div class="card dashboard-card animate__animated animate__fadeIn">
+          <div class="card-header">
+            <h5 class="card-title"><i class='bx bx-line-chart'></i> Historical Forecast Analysis</h5>
+          </div>
+          <div class="card-body">
+            <!-- HISTORICAL FORECAST FORM -->
+            <div id="historicalForecastSection" class="disabled-overlay">
+              <form id="forecastForm" action="{{ url_for('forecast') }}" method="POST" onsubmit="return validateForecastForm()">
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="filter-label">Course</label>
+                    <select name="course" id="courseSelect" class="form-select" required>
+                      <option value="">-- Select Course --</option>
+                      <option value="BSBA-FINANCIAL_MANAGEMENT">BSBA-Financial Management</option>
+                      <option value="BSBA-MARKETING_MANAGEMENT">BSBA-Marketing Management</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="filter-label">Year</label>
+                    <select name="year" id="yearSelect" class="form-select" required>
+                      <option value="">-- Select Year --</option>
+                      <option value="2008-2009">2008 - 2009</option>
+                      <option value="2009-2010">2009 - 2010</option>
+                      <option value="2010-2011">2010 - 2011</option>
+                      <option value="2011-2012">2011 - 2012</option>
+                      <option value="2012-2013">2012 - 2013</option>
+                      <option value="2013-2014">2013 - 2014</option>
+                      <option value="2014-2015">2014 - 2015</option>
+                      <option value="2015-2016">2015 - 2016</option>
+                      <option value="2016-2017">2016 - 2017</option>
+                      <option value="2017-2018">2017 - 2018</option>
+                      <option value="2018-2019">2018 - 2019</option>
+                      <option value="2019-2020">2019 - 2020</option>
+                      <option value="2020-2021">2020 - 2021</option>
+                      <option value="2021-2022">2021 - 2022</option>
+                      <option value="2022-2023">2022 - 2023</option>
+                      <option value="2023-2024">2023 - 2024</option>
+                      <option value="2024-2025">2024 - 2025</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="filter-label">Semester</label>
+                    <select name="semester" id="semesterSelect" class="form-select" required>
+                      <option value="">-- Select Semester --</option>
+                      <option value="1">1st Semester</option>
+                      <option value="2">2nd Semester</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                  <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                    <i class='bx bx-arrow-back'></i> Back to Home
+                  </a>
+                  <button type="submit" class="btn btn-primary" id="historicalForecastBtn" disabled>
+                    Generate Historical Forecast <i class='bx bx-line-chart btn-icon'></i>
+                  </button>
+                </div>
+              </form>
+              
+              <!-- Disabled message -->
+              <div id="historicalDisabledMessage" class="disabled-message">
+                <h6><i class='bx bx-data'></i> Dataset Required</h6>
+                <p>Upload a dataset to enable historical forecasting functionality.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-sm btn-primary mt-2">
+                  <i class='bx bx-upload'></i> Upload Dataset
+                </a>
+              </div>
+            </div>
+            
+            <hr class="divider">
+
+            <!-- PREDICT ENROLLMENT SECTION -->
+            <div id="predictEnrollmentSection">
+              <h5 class="card-title"><i class='bx bx-trending-up'></i> Future Enrollment Prediction</h5>
+              <p class="mb-3">Predict student enrollment for future semesters using our forecasting model</p>
+              
+              <!-- Initially hidden form -->
+              <div id="predictFormContainer" class="hidden animate__animated animate__fadeIn">
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="filter-label">Course</label>
+                    <select name="course" id="predictCourse" class="form-select" required>
+                      <option value="">-- Select Course --</option>
+                      <option value="BSBA-FINANCIAL_MANAGEMENT">BSBA-Financial Management</option>
+                      <option value="BSBA-MARKETING_MANAGEMENT">BSBA-Marketing Management</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="filter-label">Semester</label>
+                    <select name="semester" id="predictSemester" class="form-select" required>
+                      <option value="">-- Select Semester --</option>
+                      <option value="1">1st Semester</option>
+                      <option value="2">2nd Semester</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="filter-label">School Year</label>
+                    <input type="text" class="form-control" name="year" id="predictYear" 
+                           placeholder="e.g., 2026-2027" pattern="\d{4}-\d{4}" required>
+                    <div class="form-text">Format: YYYY-YYYY (e.g., 2026-2027)</div>
+                  </div>
+                </div>
+                <div class="text-center mt-4">
+                  <button type="button" class="btn predict-btn" onclick="predictEnrollment()">
+                    Predict Enrollment <i class='bx bx-trending-up btn-icon'></i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Show form button -->
+              <div class="text-center mt-4" id="showPredictFormBtn">
+                <button type="button" class="btn predict-btn" onclick="showPredictForm()">
+                  Predict Future Enrollment <i class='bx bx-chevron-right btn-icon'></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Result placeholder -->
+            <div id="predictionResult" class="mt-4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification System -->
+  <div id="notification" class="notification" style="display: none;"></div>
+
+  <!-- Add Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Global variable to track if dataset is loaded
+    let datasetLoaded = false;
+    let datasetInfo = null;
+
+    // Check dataset status on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      checkDatasetStatus();
+    });
+
+    // Check dataset status from server
+    async function checkDatasetStatus() {
+      try {
+        const response = await fetch('/check_dataset_status');
+        const result = await response.json();
+        
+        if (result.loaded && result.dataset_info) {
+          datasetLoaded = true;
+          datasetInfo = result.dataset_info;
+          updateUIWithDatasetInfo();
+        } else {
+          datasetLoaded = false;
+          datasetInfo = null;
+          updateUIWithoutDataset();
+        }
+      } catch (error) {
+        console.error('Error checking dataset status:', error);
+        datasetLoaded = false;
+        datasetInfo = null;
+        updateUIWithoutDataset();
+      }
+    }
+
+    // Update UI when dataset is loaded
+    function updateUIWithDatasetInfo() {
+      // Update dataset status section
+      const datasetStatus = document.getElementById('datasetStatus');
+      datasetStatus.className = 'dataset-status';
+      datasetStatus.innerHTML = `
+        <h5><i class='bx bx-check-circle'></i> Dataset Loaded</h5>
+        <div class="dataset-info">
+          <div class="dataset-info-item">
+            <div class="dataset-info-label">Filename</div>
+            <div class="dataset-info-value">${datasetInfo.filename}</div>
+          </div>
+          <div class="dataset-info-item">
+            <div class="dataset-info-label">Upload Date</div>
+            <div class="dataset-info-value">${datasetInfo.upload_date}</div>
+          </div>
+          <div class="dataset-info-item">
+            <div class="dataset-info-label">Records</div>
+            <div class="dataset-info-value">${datasetInfo.record_count}</div>
+          </div>
+          <div class="dataset-info-item">
+            <div class="dataset-info-label">Size</div>
+            <div class="dataset-info-value">${datasetInfo.file_size}</div>
+          </div>
+        </div>
+      `;
+
+      // Enable historical forecasting
+      document.getElementById('historicalForecastBtn').disabled = false;
+      document.getElementById('historicalForecastSection').classList.remove('disabled-overlay');
+      document.getElementById('historicalDisabledMessage').style.display = 'none';
+    }
+
+    // Update UI when no dataset is loaded
+    function updateUIWithoutDataset() {
+      // Update dataset status section
+      const datasetStatus = document.getElementById('datasetStatus');
+      datasetStatus.className = 'dataset-status no-dataset';
+      datasetStatus.innerHTML = `
+        <h5><i class='bx bx-error-circle'></i> No Dataset Loaded</h5>
+        <p>Upload a dataset to enable historical forecasting functionality.</p>
+      `;
+
+      // Disable historical forecasting
+      document.getElementById('historicalForecastBtn').disabled = true;
+      document.getElementById('historicalForecastSection').classList.add('disabled-overlay');
+      document.getElementById('historicalDisabledMessage').style.display = 'block';
+    }
+
+    function validateForecastForm() {
+      if (!datasetLoaded) {
+        showNotification('Please upload a dataset to use historical forecasting', 'error');
+        return false;
+      }
+      
+      const course = document.getElementById('courseSelect').value;
+      const year = document.getElementById('yearSelect').value;
+      const semester = document.getElementById('semesterSelect').value;
+      
+      if (!course || !year || !semester) {
+        showNotification('Please fill in all required fields', 'error');
+        return false;
+      }
+      return true;
+    }
+
+    function showPredictForm() {
+      document.getElementById('predictFormContainer').classList.remove('hidden');
+      document.getElementById('showPredictFormBtn').style.display = 'none';
+    }
+
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 300);
+        }, 4000);
+    }
+
+    // FIXED: Year validation function - removed past year restrictions
+    function validateYearFormat(year) {
+        const yearMatch = year.match(/^(\d{4})-(\d{4})$/);
+        if (!yearMatch) {
+            return { valid: false, message: 'Invalid school year format. Use YYYY-YYYY.' };
+        }
+        
+        const startYear = parseInt(yearMatch[1]);
+        const endYear = parseInt(yearMatch[2]);
+        
+        // Check if years are sequential
+        if (endYear - startYear !== 1) {
+            return { valid: false, message: 'School year must be sequential (e.g., 2026-2027)' };
+        }
+        
+        // REMOVED restrictions on past years - allow any valid sequential years
+        // Only basic sanity check for reasonable years
+        if (startYear < 2000 || startYear > 2100) {
+            return { valid: false, message: 'School year should be between 2000-2100' };
+        }
+        
+        return { valid: true };
+    }
+
+    async function predictEnrollment() {
+        const course = document.getElementById('predictCourse').value;
+        const semester = document.getElementById('predictSemester').value;
+        const year = document.getElementById('predictYear').value;
+        
+        if (!course || !semester || !year) {
+            showNotification('Please fill in all required fields', 'error');
+            return;
+        }
+
+        // Use the FIXED validation function
+        const yearValidation = validateYearFormat(year);
+        if (!yearValidation.valid) {
+            showNotification(yearValidation.message, 'error');
+            return;
+        }
+
+        try {
+            // Show loading state
+            document.getElementById('predictionResult').innerHTML = `
+              <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Processing your prediction...</p>
+              </div>
+            `;
+
+            const response = await fetch('/predict-all-models', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    course: course,
+                    semester: semester,
+                    year: year,
+                    department: 'BED'
+                }),
+            });
+
+            const result = await response.json();
+            
+            if (result.error) {
+                // Check if it's a historical data error
+                if (result.historical_data_available) {
+                    showNotification(result.error, 'info');
+                    // Optionally suggest using historical forecast
+                    document.getElementById('predictionResult').innerHTML = `
+                        <div class="alert alert-info">
+                            <h6><i class='bx bx-info-circle'></i> Historical Data Available</h6>
+                            <p>${result.error}</p>
+                            <a href="{{ url_for('bed_filter_v2') }}" class="btn btn-sm btn-primary mt-2">
+                                <i class='bx bx-line-chart'></i> Use Historical Forecast Instead
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    showNotification(result.error, 'error');
+                    document.getElementById('predictionResult').innerHTML = '';
+                }
+                return;
+            }
+
+            // Handle successful prediction with historical comparison
+            let html = `
+              <div class="result-card animate__animated animate__fadeIn">
+                <h6 class="result-title"><i class='bx bx-bar-chart-alt-2'></i> Prediction Results</h6>
+                <div class="result-item">
+                  <span class="result-label">Course:</span>
+                  <span class="result-value">${result.course.replace(/_/g, ' ')}</span>
+                </div>
+                <div class="result-item">
+                  <span class="result-label">Semester:</span>
+                  <span class="result-value">${result.semester == 1 ? '1st' : '2nd'} Semester</span>
+                </div>
+                <div class="result-item">
+                  <span class="result-label">School Year:</span>
+                  <span class="result-value">${result.year}</span>
+                </div>
+                <div class="result-item">
+                  <span class="result-label">Predicted First-Year:</span>
+                  <span class="result-value">${result.prediction} students</span>
+                </div>
+                <div class="result-item">
+                  <span class="result-label">Prediction Method:</span>
+                  <span class="result-value">${result.prediction_method === 'lstm_ensemble' ? 'LSTM Ensemble' : result.prediction_method}</span>
+                </div>
+            `;
+
+            // Add confidence interval
+            if (result.confidence_interval) {
+              html += `
+                <div class="result-item">
+                  <span class="result-label">Confidence Interval:</span>
+                  <span class="result-value">
+                    <div class="confidence-interval">
+                      ${result.confidence_interval[0]} - ${result.confidence_interval[1]} students
+                    </div>
+                  </span>
+                </div>
+              `;
+            }
+
+            // Add historical comparison if available
+            if (result.actual_data) {
+              html += `
+                <div class="result-item" style="background: rgba(32, 201, 151, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                  <span class="result-label">Actual First-Year:</span>
+                  <span class="result-value" style="color: #4e73df;">${result.actual_data.actual_first_year} students</span>
+                </div>
+                <div class="result-item">
+                  <span class="result-label">Prediction Accuracy:</span>
+                  <span class="result-value" style="color: ${result.prediction_accuracy >= 80 ? '#198754' : result.prediction_accuracy >= 60 ? '#f6c23e' : '#e74a3b'};">
+                    ${result.prediction_accuracy}% (${result.accuracy_assessment})
+                  </span>
+                </div>
+                <div class="result-item">
+                  <span class="result-label">Prediction Error:</span>
+                  <span class="result-value">±${result.prediction_error} students</span>
+                </div>
+              `;
+            } else {
+              html += `
+                <div class="result-item">
+                  <span class="result-label">Prediction Type:</span>
+                  <span class="result-value">${result.is_future_prediction ? 'Future Prediction' : 'Historical Prediction'}</span>
+                </div>
+              `;
+            }
+
+            html += `</div>`;
+            document.getElementById('predictionResult').innerHTML = html;
+            
+            showNotification('Prediction completed successfully!', 'success');
+            
+        } catch (error) {
+            showNotification('Error during prediction: ' + error.message, 'error');
+            document.getElementById('predictionResult').innerHTML = '';
+        }
+    }
+  </script>
+</body>
+</html>

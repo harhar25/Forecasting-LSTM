@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enrollment Forecasting System | Department Selection</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+      --secondary-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+      --accent-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+      --dark-blue: #2e59d9;
+      --dark-green: #17a673;
+      --dark-yellow: #c28f00;
+      --light-bg: #f8f9fc;
+      --card-shadow: 0 0.35rem 1.75rem 0 rgba(58, 59, 69, 0.2);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 5% 10%, rgba(78, 115, 223, 0.08) 0%, transparent 25%),
+        radial-gradient(circle at 95% 10%, rgba(28, 200, 138, 0.08) 0%, transparent 25%),
+        radial-gradient(circle at 50% 90%, rgba(78, 115, 223, 0.08) 0%, transparent 25%),
+        radial-gradient(circle at 20% 50%, rgba(246, 194, 62, 0.08) 0%, transparent 25%);
+      z-index: -1;
+    }
+    
+    .main-container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    
+    /* Header Styles */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+    
+    .header h1 {
+      font-weight: 800;
+      color: #4e73df;
+      margin-bottom: 0.5rem;
+      font-size: 2.8rem;
+      letter-spacing: -0.5px;
+    }
+    
+    .header p {
+      color: #6e707e;
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .header::after {
+      content: "";
+      display: block;
+      width: 100px;
+      height: 5px;
+      background: var(--primary-gradient);
+      margin: 1.5rem auto;
+      border-radius: 3px;
+    }
+    
+    /* Navigation */
+    .top-nav {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 15px;
+    }
+    
+    .nav-btn {
+      background: white;
+      border: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--card-shadow);
+      color: #4e73df;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      color: white;
+      background: var(--primary-gradient);
+    }
+    
+    /* Card Container */
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2.5rem;
+      margin-bottom: 3rem;
+    }
+    
+    .department-card {
+      flex: 1;
+      min-width: 300px;
+      max-width: 380px;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      position: relative;
+    }
+    
+    .department-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 1rem 3rem rgba(58, 59, 69, 0.3);
+    }
+    
+    .department-card.bed::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: var(--primary-gradient);
+    }
+    
+    .department-card.ced::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: var(--secondary-gradient);
+    }
+    
+    .card-content {
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .icon-container {
+      width: 90px;
+      height: 90px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      transition: var(--transition);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .bed .icon-container {
+      background: rgba(78, 115, 223, 0.1);
+      color: var(--dark-blue);
+    }
+    
+    .ced .icon-container {
+      background: rgba(28, 200, 138, 0.1);
+      color: var(--dark-green);
+    }
+    
+    .department-card:hover .icon-container {
+      transform: scale(1.1) rotate(5deg);
+    }
+    
+    .icon-container i {
+      font-size: 2.8rem;
+    }
+    
+    .card-content h3 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #4e4e4e;
+    }
+    
+    .card-content p {
+      color: #6e707e;
+      margin-bottom: 2rem;
+      line-height: 1.7;
+      flex-grow: 1;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      border-top: 1px solid #e3e6f0;
+      padding-top: 1.5rem;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #4e73df;
+    }
+    
+    .ced .stat-value {
+      color: #1cc88a;
+    }
+    
+    .stat-label {
+      font-size: 0.85rem;
+      color: #858796;
+    }
+    
+    .department-btn {
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .department-btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: 0.5s;
+    }
+    
+    .department-btn:hover::before {
+      left: 100%;
+    }
+    
+    .bed .department-btn {
+      background: var(--primary-gradient);
+      color: white;
+    }
+    
+    .bed .department-btn:hover {
+      background: linear-gradient(135deg, #3a59c7 0%, #1a3bb8 100%);
+      box-shadow: 0 5px 15px rgba(78, 115, 223, 0.4);
+    }
+    
+    .ced .department-btn {
+      background: var(--secondary-gradient);
+      color: white;
+    }
+    
+    .ced .department-btn:hover {
+      background: linear-gradient(135deg, #18b980 0%, #0f7350 100%);
+      box-shadow: 0 5px 15px rgba(28, 200, 138, 0.4);
+    }
+    
+    .btn-icon {
+      margin-left: 0.5rem;
+      transition: var(--transition);
+    }
+    
+    .department-btn:hover .btn-icon {
+      transform: translateX(5px);
+    }
+    
+    /* Upload Section */
+    .upload-section {
+      background: white;
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 3rem;
+      transition: var(--transition);
+    }
+    
+    .upload-section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0.5rem 2rem rgba(58, 59, 69, 0.2);
+    }
+    
+    .upload-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .upload-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: rgba(246, 194, 62, 0.1);
+      color: var(--dark-yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+    }
+    
+    .upload-icon i {
+      font-size: 1.5rem;
+    }
+    
+    .upload-header h3 {
+      font-weight: 700;
+      color: #5a5c69;
+      margin-bottom: 0;
+    }
+    
+    .form-label {
+      font-weight: 600;
+      color: #5a5c69;
+    }
+    
+    .upload-btn {
+      background: var(--accent-gradient);
+      border: none;
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      color: white;
+      transition: var(--transition);
+    }
+    
+    .upload-btn:hover {
+      background: linear-gradient(135deg, #e9b637 0%, #c28f00 100%);
+      box-shadow: 0 5px 15px rgba(246, 194, 62, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: #858796;
+      font-size: 0.95rem;
+    }
+    
+    /* Animations */
+    .animate-delay-1 {
+      animation-delay: 0.2s;
+    }
+    
+    .animate-delay-2 {
+      animation-delay: 0.4s;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .card-container {
+        gap: 2rem;
+      }
+      
+      .department-card {
+        min-width: 280px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 1.5rem;
+      }
+      
+      .header h1 {
+        font-size: 2.2rem;
+      }
+      
+      .header p {
+        font-size: 1.1rem;
+      }
+      
+      .card-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .department-card {
+        min-width: 100%;
+        max-width: 100%;
+      }
+      
+      .top-nav {
+        position: relative;
+        top: 0;
+        right: 0;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .card-content {
+        padding: 2rem;
+      }
+      
+      .upload-section {
+        padding: 2rem;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+    }
+    
+    /* Toast notification */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    
+    .custom-toast {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    
+    .custom-toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    
+    .toast-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .toast-success .toast-icon {
+      background: rgba(28, 200, 138, 0.2);
+      color: #1cc88a;
+    }
+    
+    .toast-error .toast-icon {
+      background: rgba(231, 74, 59, 0.2);
+      color: #e74a3b;
+    }
+    
+    .toast-info .toast-icon {
+      background: rgba(78, 115, 223, 0.2);
+      color: #4e73df;
+    }
+    
+    /* Dataset Status */
+    .dataset-status {
+      background: rgba(78, 115, 223, 0.05);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-left: 4px solid #4e73df;
+    }
+    
+    .dataset-status h5 {
+      color: #4e73df;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .dataset-status h5 i {
+      margin-right: 0.5rem;
+    }
+    
+    .dataset-info {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    
+    .dataset-info-item {
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .dataset-info-label {
+      font-size: 0.85rem;
+      color: #6e707e;
+    }
+    
+    .dataset-info-value {
+      font-weight: 600;
+      color: #4e73df;
+    }
+    
+    .no-dataset {
+      background: rgba(246, 194, 62, 0.05);
+      border-left: 4px solid #f6c23e;
+    }
+    
+    .no-dataset h5 {
+      color: #f6c23e;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Navigation Buttons -->
+    <!--div class="top-nav">
+      <button class="nav-btn" title="Dashboard">
+        <i class="bx bx-home"></i>
+      </button>
+      <button class="nav-btn" title="Settings">
+        <i class="bx bx-cog"></i>
+      </button>
+      <button class="nav-btn" title="Help">
+        <i class="bx bx-help-circle"></i>
+      </button>
+      <button class="nav-btn" title="User Profile">
+        <i class="bx bx-user"></i>
+      </button>
+    </div>-->
+    
+    <!-- Header -->
+    <div class="header animate__animated animate__fadeInDown">
+      <h1>Enrollment Forecasting System</h1>
+      <p>Select a department to access enrollment forecasting tools and historical data analysis</p>
+    </div>
+    
+    <!-- Dataset Status -->
+    <div id="datasetStatus" class="dataset-status no-dataset">
+      <h5><i class='bx bx-error-circle'></i> No Dataset Loaded</h5>
+      <p>Upload a dataset to enable historical forecasting functionality.</p>
+    </div>
+    
+    <!-- Department Cards -->
+    <form method="POST" action="{{ url_for('select_department') }}">
+      <div class="card-container">
+        <div class="department-card bed animate__animated animate__fadeInLeft">
+          <div class="card-content">
+            <div class="icon-container">
+              <i class='bx bx-building-house'></i>
+            </div>
+            <h3>Business Education Department</h3>
+            <p>Access forecasting tools for business programs including Financial Management, Marketing Management, and other business-related courses.</p>
+            
+           <div class="stats">
+              <div class="stat-item">
+                  <div class="stat-value" id="bed-students">0</div>
+                  <div class="stat-label">Students</div>
+              </div>
+              <div class="stat-item">
+                  <div class="stat-value" id="bed-programs">0</div>
+                  <div class="stat-label">Programs</div>
+              </div>
+              <div class="stat-item">
+                  <div class="stat-value" id="bed-years">0</div>
+                  <div class="stat-label">Years</div>
+              </div>
+          </div>
+            
+            <button class="department-btn" type="submit" name="department" value="BED" id="bedButton">
+              Select BED <i class='bx bx-chevron-right btn-icon'></i>
+            </button>
+            <small class="text-muted mt-2" id="bedDisabledText" style="display: none;">Dataset required for historical forecasting</small>
+          </div>
+        </div>
+        
+        <div class="department-card ced animate__animated animate__fadeInRight animate-delay-1">
+          <div class="card-content">
+            <div class="icon-container">
+              <i class='bx bx-code-block'></i>
+            </div>
+            <h3>Computer Education Department</h3>
+            <p>Access forecasting tools for computer science and IT programs including Software Engineering, Data Science, and other technology courses.</p>
+            
+            <div class="stats">
+              <div class="stat-item">
+                  <div class="stat-value" id="ced-students">0</div>
+                  <div class="stat-label">Students</div>
+              </div>
+              <div class="stat-item">
+                  <div class="stat-value" id="ced-programs">0</div>
+                  <div class="stat-label">Programs</div>
+              </div>
+              <div class="stat-item">
+                  <div class="stat-value" id="ced-years">0</div>
+                  <div class="stat-label">Years</div>
+              </div>
+          </div>
+      
+            <button class="department-btn" type="submit" name="department" value="CED" id="cedButton">
+              Select CED <i class='bx bx-chevron-right btn-icon'></i>
+            </button>
+            <small class="text-muted mt-2" id="cedDisabledText" style="display: none;">Dataset required for historical forecasting</small>
+          </div>
+        </div>
+      </div>
+    </form>
+    
+    <!-- Upload Dataset Section -->
+    <div class="upload-section animate__animated animate__fadeInUp animate-delay-2">
+      <div class="upload-header">
+        <div class="upload-icon">
+          <i class="bx bx-cloud-upload"></i>
+        </div>
+        <h3>Upload New Dataset</h3>
+      </div>
+      
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="mb-4">
+          <label for="datasetFile" class="form-label">Select CSV file to upload</label>
+          <input type="file" class="form-control" id="datasetFile" accept=".csv" required>
+          <div class="form-text">Maximum file size: 10MB. File should contain enrollment data with proper formatting.</div>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <button type="submit" class="upload-btn">
+              <i class='bx bx-upload'></i> Upload Dataset</button>
+          </div>
+          
+          <div>
+            <a href="#" class="text-decoration-none me-3" id="downloadTemplate">
+              <i class='bx bx-download'></i> Download Template
+            </a>
+            <a href="#" class="text-decoration-none" id="formatHelp">
+              <i class='bx bx-help-circle'></i> Format Help
+            </a>
+          </div>
+        </div>
+      </form>
+      
+      <div id="uploadStatus" class="mt-4"></div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer animate__animated animate__fadeInUp">
+      <p>© 2023 Enrollment Forecasting System | Enterprise Edition v2.1</p>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // Global variable to track if dataset is loaded
+    let datasetLoaded = false;
+    let datasetInfo = null;
+
+    // Check if dataset is already loaded on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      checkDatasetStatus();
+    });
+
+    // Check dataset status from server
+    async function checkDatasetStatus() {
+      try {
+        const response = await fetch('/check_dataset_status');
+        const result = await response.json();
+        
+        if (result.loaded && result.dataset_info) {
+          datasetLoaded = true;
+          datasetInfo = result.dataset_info;
+          updateUIWithDatasetInfo();
+        } else {
+          datasetLoaded = false;
+          datasetInfo = null;
+          updateUIWithoutDataset();
+        }
+      } catch (error) {
+        console.error('Error checking dataset status:', error);
+        datasetLoaded = false;
+        datasetInfo = null;
+        updateUIWithoutDataset();
+      }
+    }
+
+    // Update UI when dataset is loaded
+// Update UI when dataset is loaded
+      function updateUIWithDatasetInfo() {
+          // Update dataset status section
+          const datasetStatus = document.getElementById('datasetStatus');
+          datasetStatus.className = 'dataset-status';
+          datasetStatus.innerHTML = `
+              <h5><i class='bx bx-check-circle'></i> Dataset Loaded</h5>
+              <div class="dataset-info">
+                  <div class="dataset-info-item">
+                      <div class="dataset-info-label">Filename</div>
+                      <div class="dataset-info-value">${datasetInfo.filename}</div>
+                  </div>
+                  <div class="dataset-info-item">
+                      <div class="dataset-info-label">Upload Date</div>
+                      <div class="dataset-info-value">${datasetInfo.upload_date}</div>
+                  </div>
+                  <div class="dataset-info-item">
+                      <div class="dataset-info-label">Records</div>
+                      <div class="dataset-info-value">${datasetInfo.record_count}</div>
+                  </div>
+                  <div class="dataset-info-item">
+                      <div class="dataset-info-label">Size</div>
+                      <div class="dataset-info-value">${datasetInfo.file_size}</div>
+                  </div>
+              </div>
+          `;
+
+          // Update department statistics
+          if (datasetInfo.student_counts) {
+              document.getElementById('bed-students').textContent = datasetInfo.student_counts.BED || '0';
+              document.getElementById('ced-students').textContent = datasetInfo.student_counts.CED || '0';
+          }
+          
+          if (datasetInfo.program_counts) {
+              document.getElementById('bed-programs').textContent = datasetInfo.program_counts.BED || '0';
+              document.getElementById('ced-programs').textContent = datasetInfo.program_counts.CED || '0';
+          }
+          
+          if (datasetInfo.year_spans) {
+              document.getElementById('bed-years').textContent = datasetInfo.year_spans.BED || '0';
+              document.getElementById('ced-years').textContent = datasetInfo.year_spans.CED || '0';
+          }
+
+          // Enable department buttons
+          document.getElementById('bedButton').disabled = false;
+          document.getElementById('cedButton').disabled = false;
+          
+          // Remove disabled text
+          document.getElementById('bedDisabledText').style.display = 'none';
+          document.getElementById('cedDisabledText').style.display = 'none';
+      }
+
+    // Update UI when no dataset is loaded
+    // Update UI when no dataset is loaded
+      function updateUIWithoutDataset() {
+          // Update dataset status section
+          const datasetStatus = document.getElementById('datasetStatus');
+          datasetStatus.className = 'dataset-status no-dataset';
+          datasetStatus.innerHTML = `
+              <h5><i class='bx bx-error-circle'></i> No Dataset Loaded</h5>
+              <p>Please upload a dataset to enable forecasting functionality.</p>
+          `;
+
+          // Reset all statistics to zero
+          document.getElementById('bed-students').textContent = '0';
+          document.getElementById('bed-programs').textContent = '0';
+          document.getElementById('bed-years').textContent = '0';
+          
+          document.getElementById('ced-students').textContent = '0';
+          document.getElementById('ced-programs').textContent = '0';
+          document.getElementById('ced-years').textContent = '0';
+
+          // Disable department buttons
+          document.getElementById('bedButton').disabled = true;
+          document.getElementById('cedButton').disabled = true;
+          
+          // Show disabled text
+          document.getElementById('bedDisabledText').style.display = 'block';
+          document.getElementById('cedDisabledText').style.display = 'block';
+      }
+    
+    // Show toast notification
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `custom-toast toast-${type}`;
+      
+      let iconClass = 'bx bx-info-circle';
+      if (type === 'success') iconClass = 'bx bx-check-circle';
+      if (type === 'error') iconClass = 'bx bx-error-circle';
+      
+      toast.innerHTML = `
+        <div class="toast-icon">
+          <i class="${iconClass}"></i>
+        </div>
+        <div>${message}</div>
+      `;
+      
+      document.getElementById('toastContainer').appendChild(toast);
+      
+      // Show toast
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      // Hide toast after 5 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 5000);
+    }
+    
+    // Handle dataset upload
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const fileInput = document.getElementById('datasetFile');
+      const file = fileInput.files[0];
+      const statusDiv = document.getElementById('uploadStatus');
+      
+      if (!file) {
+        showToast('Please select a file to upload', 'error');
+        return;
+      }
+      
+      // Validate file type
+      if (!file.name.endsWith('.csv')) {
+        showToast('Please upload a CSV file', 'error');
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('File size exceeds 10MB limit', 'error');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      showToast('Uploading file...', 'info');
+      
+      try {
+        const response = await fetch('/upload_dataset', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('Dataset uploaded successfully!', 'success');
+          fileInput.value = ''; // Clear file input
+          
+          // Update dataset status
+          datasetLoaded = true;
+          datasetInfo = result.dataset_info;
+          updateUIWithDatasetInfo();
+          
+          // Update status div with success message
+          statusDiv.innerHTML = `
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+              <i class="bx bx-check-circle me-2"></i>
+              <div>Dataset "${file.name}" uploaded successfully. Historical forecasting is now enabled.</div>
+            </div>
+          `;
+        } else {
+          showToast(result.error || 'Upload failed', 'error');
+          statusDiv.innerHTML = `
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+              <i class="bx bx-error-circle me-2"></i>
+              <div>${result.error || 'Upload failed. Please try again.'}</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        showToast(`Upload error: ${error.message}`, 'error');
+        statusDiv.innerHTML = `
+          <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bx bx-error-circle me-2"></i>
+            <div>Upload error: ${error.message}</div>
+          </div>
+        `;
+      }
+    });
+    
+    // Add animation to navigation buttons
+    document.querySelectorAll('.nav-btn').forEach((btn, index) => {
+      btn.style.animationDelay = `${0.1 * index}s`;
+      btn.classList.add('animate__fadeInRight');
+    });
+
+    // Handle template download
+    document.getElementById('downloadTemplate').addEventListener('click', function(e) {
+      e.preventDefault();
+      showToast('Downloading template...', 'info');
+      // In a real implementation, this would trigger a file download
+      // For now, we'll just show a message
+      setTimeout(() => {
+        showToast('Template download started', 'success');
+      }, 1000);
+    });
+
+    // Handle format help
+    document.getElementById('formatHelp').addEventListener('click', function(e) {
+      e.preventDefault();
+      showToast('Opening format help...', 'info');
+      // In a real implementation, this would open a help modal or page
+      // For now, we'll just show a message
+      setTimeout(() => {
+        showToast('Format help displayed', 'success');
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
